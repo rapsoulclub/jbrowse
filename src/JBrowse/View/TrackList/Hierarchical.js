@@ -71,6 +71,8 @@ return declare(
     buildRendering: function() {
         this.inherited(arguments);
 
+        var thisB =this;
+
         var topPane = new ContentPane({ className: 'header' });
         this.addChild( topPane );
         dom.create(
