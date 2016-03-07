@@ -991,10 +991,12 @@ return declare( [Component,DetailsMixin,FeatureFiltererMixin,Destroyable],
         function setContent( dialog, content ) {
             // content can be a promise or Deferred
             if( typeof content.then == 'function' )
-                content.then( function( c ) { dialog.set( 'content', c ); } );
+                content.then( function( c ) { dialog.set( 'content', c ); dialog.show(); } );
             // or maybe it's just a regular object
-            else
+            else {
                 dialog.set( 'content', content );
+                dialog.show();
+            }
         }
 
         // if dialog == xhr, open the link in a dialog
@@ -1070,7 +1072,7 @@ return declare( [Component,DetailsMixin,FeatureFiltererMixin,Destroyable],
         });
 
         // show the dialog
-        dialog.show();
+        if( type != 'content' ) dialog.show();
     },
 
     /**
