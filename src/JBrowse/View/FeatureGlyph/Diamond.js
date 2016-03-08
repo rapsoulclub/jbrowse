@@ -10,7 +10,6 @@ return declare(Box, {
     renderBox: function( context, viewInfo, feature, top, overallHeight, parentFeature, style ) {
 
         var left  = viewInfo.block.bpToX( feature.get('start') );
-        var width = viewInfo.block.bpToX( feature.get('end') ) - left;
         //left = Math.round( left );
         //width = Math.round( width );
 
@@ -21,6 +20,7 @@ return declare(Box, {
             return;
         if( height != overallHeight )
             top += Math.round( (overallHeight - height)/2 );
+        var width = height;
 
         // background
         var bgcolor = style( feature, 'color' );
