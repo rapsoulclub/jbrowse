@@ -8,6 +8,7 @@ define(['dojo/_base/declare',
 
         'dijit/TitlePane',
         'dijit/layout/ContentPane',
+        'dijit/form/CheckBox',
 
         'JBrowse/Util',
         './_TextFilterMixin'
@@ -23,6 +24,7 @@ define(['dojo/_base/declare',
 
            TitlePane,
            ContentPane,
+           CheckBox,
 
            Util,
            _TextFilterMixin
@@ -177,22 +179,21 @@ return declare(
 
             category.pane.domNode.style.display = 'block';
 
-            // note: sometimes trackConf.description is defined as numeric, so in this case, ignore it
-            var labelNode = dom.create(
-                'label', {
-                    className: 'tracklist-label shown',
-                    title: Util.escapeHTML( trackConf.shortDescription || track.shortDescription ||  (trackConf.description===1?undefined:trackConf.description) || track.description || trackConf.Description || track.Description || trackConf.metadata && ( trackConf.metadata.shortDescription || trackConf.metadata.description || trackConf.metadata.Description ) || track.key || trackConf.key || trackConf.label )
-                }, category.pane.containerNode );
 
-            var checkbox = dom.create('input', { type: 'checkbox', className: 'check' }, labelNode );
-            var trackLabel = trackConf.label;
-            var checkListener;
-            this.own( checkListener = on( checkbox, 'click', function() {
-                thisB.browser.publish( '/jbrowse/v1/v/tracks/'+(this.checked ? 'show' : 'hide'), [trackConf] );
-            }));
-            dom.create('span', { className: 'key', innerHTML: trackConf.key || trackConf.label }, labelNode );
+            var checkbox = new CheckBox({ id: 'blah-'+track.label });
 
-            category.tracks[ trackLabel ] = { checkbox: checkbox, checkListener: checkListener, labelNode: labelNode };
+            var chkboxId = 'chk' + track.label;
+            var chkbox = new dijit.form.CheckBox({
+                id: chkboxId
+            });
+            chkbox.placeAt(category.pane.containerNode);
+            var lbl = dom.create('label', {innerHTML: trackConf.key || trackConf.label});
+
+            category.pane.containerNode.appendChild(lbl);
+            dom.create('br', {}, category.pane.containerNode );
+
+
+            category.tracks[ track.label ] = { checkbox: checkbox };
 
             this._updateTitles( category );
         }, this );
