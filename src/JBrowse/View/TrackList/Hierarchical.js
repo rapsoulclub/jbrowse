@@ -181,10 +181,11 @@ return declare(
 
             var chkboxId = 'chk' + track.label;
             var chkbox = new CheckBox({
-                id: chkboxId,
-                onChange: function() {
-                    thisB.browser.publish( '/jbrowse/v1/v/tracks/'+(this.checked ? 'show' : 'hide'), [trackConf] );
-                }
+                id: chkboxId
+            });
+
+            on(chkbox, 'click', function() {
+                thisB.browser.publish( '/jbrowse/v1/v/tracks/'+(this.checked ? 'show' : 'hide'), [trackConf] );
             });
             chkbox.placeAt(category.pane.containerNode);
             var lbl = dom.create('label', {innerHTML: trackConf.key || trackConf.label});
