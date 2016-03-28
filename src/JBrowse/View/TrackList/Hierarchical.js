@@ -188,7 +188,7 @@ return declare(
                 thisB.browser.publish( '/jbrowse/v1/v/tracks/'+(this.checked ? 'show' : 'hide'), [trackConf] );
             });
             chkbox.placeAt(category.pane.containerNode);
-            var lbl = dom.create('label', {class: 'shown', innerHTML: trackConf.key || trackConf.label});
+            var lbl = dom.create('label', { "class": 'shown', innerHTML: trackConf.key || trackConf.label});
 
             category.pane.containerNode.appendChild(lbl);
             dom.create('br', {}, category.pane.containerNode );
