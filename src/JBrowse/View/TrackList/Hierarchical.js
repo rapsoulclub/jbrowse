@@ -179,12 +179,12 @@ return declare(
 
             category.pane.domNode.style.display = 'block';
 
-
-            var checkbox = new CheckBox({ id: 'blah-'+track.label });
-
             var chkboxId = 'chk' + track.label;
-            var chkbox = new dijit.form.CheckBox({
-                id: chkboxId
+            var chkbox = new CheckBox({
+                id: chkboxId,
+                onChange: function() {
+                    thisB.browser.publish( '/jbrowse/v1/v/tracks/'+(this.checked ? 'show' : 'hide'), [trackConf] );
+                }
             });
             chkbox.placeAt(category.pane.containerNode);
             var lbl = dom.create('label', {innerHTML: trackConf.key || trackConf.label});
@@ -193,7 +193,7 @@ return declare(
             dom.create('br', {}, category.pane.containerNode );
 
 
-            category.tracks[ track.label ] = { checkbox: checkbox };
+            category.tracks[ track.label ] = { checkbox: chkbox };
 
             this._updateTitles( category );
         }, this );
@@ -258,9 +258,10 @@ return declare(
      * that they are turned on.
      */
     setTracksActive: function( /**Array[Object]*/ trackConfigs ) {
+        console.log('here');
         array.forEach( trackConfigs, function(conf) {
             this._findTrack( conf.label, function( trackRecord, category ) {
-                trackRecord.checkbox.checked = true;
+                trackRecord.checkbox.set('checked', true);
             });
         },this);
     },
@@ -280,9 +281,10 @@ return declare(
      * that they are turned off.
      */
     setTracksInactive: function( /**Array[Object]*/ trackConfigs ) {
+        console.log('here2');
           array.forEach( trackConfigs, function(conf) {
             this._findTrack( conf.label, function( trackRecord, category ) {
-                trackRecord.checkbox.checked = false;
+                trackRecord.checkbox.set('checked', false);
             });
         },this);
     },
