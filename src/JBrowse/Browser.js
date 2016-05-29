@@ -303,7 +303,7 @@ initPlugins: function() {
             if( !( 'js' in p ))
                 p.js = p.location+"/js"; //URL resolution for this is taken care of by the JS loader
             if( p.js.charAt(0) != '/' && ! /^https?:/i.test( p.js ) )
-                p.js = '../'+p.js;
+                p.js = './'+p.js;
 
             // figure out css path
             if( !( 'css' in p ))
@@ -320,6 +320,7 @@ initPlugins: function() {
 
         require( {
                      packages: array.map( plugins, function(p) {
+                                           console.log(p.name,p.js);
                                               return {
                                                   name: p.name,
                                                   location: p.js
