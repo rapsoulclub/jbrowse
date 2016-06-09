@@ -249,7 +249,7 @@ return declare( null, {
                           },
 
     _fileDownload: function( args ) {
-        saveAs(new Blob([args.data], {type: args.format ? 'application/x-'+args.format.toLowerCase() : 'text/plain'}), args.filename);
+        saveAs(new Blob([args.data], {type: has('safari')? 'text/plain' : args.format ? 'application/x-'+args.format.toLowerCase() : 'text/plain'}), args.filename);
         // We will need to check whether this breaks the WebApollo plugin.
     },
 

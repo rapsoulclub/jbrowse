@@ -11,7 +11,7 @@
     "xstyle":       "0.3.2",
     "jDataView":    "rbuels/jDataView",
     "jszlib":       "rbuels/jszlib",
-    "FileSaver":    "dkasenberg/FileSaver.js",
+    "FileSaver":    "eligrey/FileSaver.js",
     "json-schema":  "kriszyp/json-schema#0.2.1",
     "lazyload":     "rbuels/lazyload#amd",
     "dbind":        "rbuels/dbind"
