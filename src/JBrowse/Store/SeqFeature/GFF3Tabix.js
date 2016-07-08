@@ -104,7 +104,8 @@ return declare( [ SeqFeatureStore, DeferredStatsMixin, DeferredFeaturesMixin, Gl
 
     _getFeatures: function( query, featureCallback, finishedCallback, errorCallback ) {
         var thisB = this;
-        var f=featureCallback;
+        var f = featureCallback;
+        var fa = [];
         var parser = new Parser(
             {
                 featureCallback: function(fs) {
@@ -117,16 +118,20 @@ return declare( [ SeqFeatureStore, DeferredStatsMixin, DeferredFeaturesMixin, Gl
                     finishedCallback();
                 }
             });
-
         thisB.getHeader().then( function() {
             thisB.indexedData.getLines(
                 query.ref || thisB.refSeq.name,
                 query.start,
                 query.end,
                 function( line ) {
-                    parser._buffer_feature( thisB.lineToFeature(line) );
+                    fa.push(thisB.lineToFeature(line));
                 },
                 function() {
+                    var nopars=array.filter(fa,function(f) { return !f.attributes.Parent; });
+                    var pars=array.filter(fa,function(f) { return !!f.attributes.Parent; });
+                    thisB._bubbleSort(pars,thisB._compareFeatureData);
+                    array.forEach(dojo.clone(nopars), dojo.hitch(parser, "_buffer_feature"));
+                    array.forEach(dojo.clone(pars), dojo.hitch(parser, "_buffer_feature"));
                     parser.finish();
                 },
                 errorCallback
@@ -197,6 +202,26 @@ return declare( [ SeqFeatureStore, DeferredStatsMixin, DeferredFeaturesMixin, Gl
         });
         f._reg_seq_id = this.browser.regularizeReferenceName( data.seq_id );
         return f;
+    },
+    // move subfeatures down and parent features up
+    _compareFeatureData: function( a, b ) {
+        if( b.attributes.ID[0] == a.attributes.Parent[0] ) return 1;
+        return -1;
+    },
+    // bubblesort enables necessary number of comparisons
+    _bubbleSort: function(a) {
+        var swapped;
+        do {
+            swapped = false;
+            for (var i = 0; i < a.length-1; i++) {
+                if (this._compareFeatureData(a[i], a[i+1])>0) {
+                    var temp = a[i];
+                    a[i] = a[i+1];
+                    a[i+1] = temp;
+                    swapped = true;
+                }
+            }
+        } while (swapped);
     },
 
     /**
