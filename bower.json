@@ -15,5 +15,8 @@
     "json-schema":  "kriszyp/json-schema#0.2.1",
     "lazyload":     "rbuels/lazyload#amd",
     "dbind":        "rbuels/dbind"
+  },
+  "devDependencies": {
+    "jasmine-core": "jasmine#^2.4.1"
   }
 }

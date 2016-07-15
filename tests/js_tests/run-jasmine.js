@@ -1,93 +1,92 @@
-/*global require:false,console:false,phantom:false */
-/*jshint maxstatements:13,maxcomplexity:3 */
+"use strict";
 var system = require('system');
-var page = require('webpage').create();
-page.onConsoleMessage = function(msg) {
-  console.log(msg);
+
+/**
+ * Wait until the test condition is true or a timeout occurs. Useful for waiting
+ * on a server response or for a ui change (fadeIn, etc.) to occur.
+ *
+ * @param testFx javascript condition that evaluates to a boolean,
+ * it can be passed in as a string (e.g.: "1 == 1" or "$('#bar').is(':visible')" or
+ * as a callback function.
+ * @param onReady what to do when testFx condition is fulfilled,
+ * it can be passed in as a string (e.g.: "1 == 1" or "$('#bar').is(':visible')" or
+ * as a callback function.
+ * @param timeOutMillis the max amount of time to wait. If not specified, 3 sec is used.
+ */
+function waitFor(testFx, onReady, timeOutMillis) {
+    var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 3001, //< Default Max Timeout is 3s
+        start = new Date().getTime(),
+        condition = false,
+        interval = setInterval(function() {
+            if ( (new Date().getTime() - start < maxtimeOutMillis) && !condition ) {
+                // If not time-out yet and condition not yet fulfilled
+                condition = (typeof(testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
+            } else {
+                if(!condition) {
+                    // If condition still not fulfilled (timeout but condition is 'false')
+                    console.log("'waitFor()' timeout");
+                    phantom.exit(1);
+                } else {
+                    typeof(onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
+                    clearInterval(interval); //< Stop this interval
+                }
+            }
+        }, 100); //< repeat check every 100ms
 };
 
-if (system.args.length != 2) {
-  console.log('Usage: phantomjs phantomjs-test-runner.js URL');
-  phantom.exit(1);
+
+if (system.args.length !== 2) {
+    console.log('Usage: run-jasmine2.js URL');
+    phantom.exit(1);
 }
 
+var page = require('webpage').create();
 
-var JasmineUtil = {
-  maxtimeSec: 20,
-  isDone: function () {
-    return page.evaluate(function(){
-      return document.querySelector('.symbolSummary') !== null &&
-             document.querySelector('.symbolSummary .pending') === null;
-    });
-  },
-  parseResults: function () {
-    var exitCode = page.evaluate(function () {
-      var list = document.querySelectorAll('.results > #details > .specDetail.failed');
-      if (list && list.length > 0) {
-        console.log('');
-        console.log(list.length + ' test(s) FAILED:');
-        for( var i=0; i<list.length; i++ ) {
-          var el = list[i],
-              desc = el.querySelector('.description').innerText,
-              res = el.querySelector('.resultMessage.fail').innerText;
-          console.log('');
-          console.log(desc);
-          console.log(res);
-          console.log('');
-        }
-        return 1;
-      }
-      else {
-        console.log(document.querySelector('.alert > .passingAlert.bar').innerText);
-        return 0;
-      }
-    });
-    phantom.exit(exitCode);
-  },
-  waitAndRun: function (callback) {
-    var self = this;
-    var start = new Date().getTime();
-    var intervalId = setInterval(function () {
-      var millisPassed = new Date().getTime() - start;
-      if ( self.isDone() ) {
-        clearInterval(intervalId);
-        callback();
-        return ;
-      }
-      else if (millisPassed >= (self.maxtimeSec * 1000)) {
-        console.log('Script timed out after ' + self.maxtimeSec + ' seconds');
-        phantom.exit(1);
-      }
-    }, 100);
-  }
+// Route "console.log()" calls from within the Page context to the main Phantom context (i.e. current "this")
+page.onConsoleMessage = function(msg) {
+    console.log(msg);
 };
 
+page.open(system.args[1], function(status){
+    if (status !== "success") {
+        console.log("Unable to access network");
+        phantom.exit();
+    } else {
+        waitFor(function(){
+            return page.evaluate(function(){
+                return (document.body.querySelector('.symbolSummary .pending') === null &&
+                        document.body.querySelector('.jasmine-duration') !== null);
+            });
+        }, function(){
+            var exitCode = page.evaluate(function(){
+                console.log('');
 
-var url = system.args[1];
-var statusCode = null;
+                var title = 'Jasmine';
+                var version = document.body.querySelector('.jasmine-version').innerText;
+                var duration = document.body.querySelector('.jasmine-duration').innerText;
+                var banner = title + ' ' + version + ' ' + duration;
+                console.log(banner);
 
-page.open(url, function (status) {
-  if (status !== 'success') {
-    console.log('Unable to open URI: ' + url);
-    phantom.exit(1);
-  }
-  else {
-    if(statusCode && statusCode.toString().substr(0,1) > 3) {
-      console.log('Unable to open ' + url);
-      console.log('Returned with status code - ' + statusCode);
-      phantom.exit(1);
-      return ;
+                var list = document.body.querySelectorAll('.jasmine-results > .jasmine-failures > .jasmine-spec-detail.jasmine-failed');
+                if (list && list.length > 0) {
+                  console.log('');
+                  console.log(list.length + ' test(s) FAILED:');
+                  for (i = 0; i < list.length; ++i) {
+                      var el = list[i],
+                          desc = el.querySelector('.jasmine-description'),
+                          msg = el.querySelector('.jasmine-messages > .jasmine-result-message');
+                      console.log('');
+                      console.log(desc.innerText);
+                      console.log(msg.innerText);
+                      console.log('');
+                  }
+                  return 1;
+                } else {
+                  console.log(document.body.querySelector('.jasmine-alert > .jasmine-bar,.jasmine-passed > .bar.skipped').innerText);
+                  return 0;
+                }
+            });
+            phantom.exit(exitCode);
+        });
     }
-    page.evaluate(function () {
-      console.log('Running test suite: ' + document.title);
-      console.log('Loaded ' + window.location.href);
-    });
-    JasmineUtil.waitAndRun(JasmineUtil.parseResults);
-  }
 });
-page.onResourceReceived = function (resource) {
-  if (resource.url == url) {
-    statusCode = resource.status;
-  }
-};
-

@@ -37,5 +37,6 @@ src/lazyload/
 src/put-selector/
 src/util/
 src/xstyle/
+src/jasmine-core
 node_modules
 .idea/**
