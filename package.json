@@ -9,6 +9,8 @@
     "start": "electron browser/main.js"
   },
   "dependencies": {
-    "electron-screenshot": "^1.0.4"
+    "electron-screenshot": "^1.0.4",
+    "express": "^4.15.2",
+    "node-getopt": "^0.2.3"
   }
 }
