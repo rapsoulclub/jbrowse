@@ -15,7 +15,6 @@ done_message () {
 
 echo > setup.log;
 
-<<<<<<< HEAD
 LEGACY_INSTALL=0
 if [ $# -gt 1 ] ; then
   echo "USAGE: ./setup.sh [legacy]"
@@ -42,8 +41,6 @@ else
     check_bower >> setup.log ;
     echo "Bower dependencies already installed.  Type '$bower_executable install -f --allow-root' to force reinstallation of dependencies.";
 fi
-=======
->>>>>>> Adjust paths for node_modules
 
 
 # log information about this system
