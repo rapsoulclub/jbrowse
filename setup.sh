@@ -31,18 +31,7 @@ function check_node(){
 
 function check_bower(){
     check_node;
-    bower_executable=$(which bower)
-    if ! [ -x "$bower_executable" ] ; then
-        $npm_executable install -g bower
-        bower_executable=$(which bower)
-        if ! [ -x "$bower_executable" ] ; then
-            echo "You must install 'bower' to install JBrowse `npm install -g bower` using bower."
-        else
-            echo "Bower installed";
-        fi
-    else
-        echo "Bower installed";
-    fi
+    $npm_executable install bower
 }
 
 
@@ -56,8 +45,6 @@ if [ $# -gt 1 ] ; then
 fi
 if [[ ($# -eq 1) && ("$1" = "legacy") ]] ; then
   LEGACY_INSTALL=1
-else
-  legacy_message
 fi
 
 # if src/dojo/dojo.js exists, but that is the only file in that directory (or other directories don't exist)
@@ -69,10 +56,7 @@ if [ -f "src/dojo/dojo.js" ] && ! [ -f "src/dojo/_firebug/firebug.js" ]; then
 elif ! [ -f "src/dojo/dojo.js" ]; then
     echo "Dojo does not exist, installing" ;
     check_bower >> setup.log ;
-    $bower_executable install -f --allow-root >> setup.log ;
-else
-    check_bower >> setup.log ;
-    echo -n "  Bower dependencies already installed.  Type '$bower_executable install -f --allow-root' to force reinstallation of dependencies.";
+    ./node_modules/.bin/bower install -f --allow-root >> setup.log ;
 fi
 echo "done"
 
