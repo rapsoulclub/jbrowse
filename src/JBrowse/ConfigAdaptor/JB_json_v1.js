@@ -217,6 +217,8 @@ return declare('JBrowse.ConfigAdaptor.JB_json_v1',null,
                         /\.gff3?.gz$/i.test( urlTemplate )    ? 'JBrowse/Store/SeqFeature/GFF3Tabix'                                                :
                         /\.bed.gz$/i.test( urlTemplate )      ? 'JBrowse/Store/SeqFeature/BEDTabix'                                                 :
                         /\.(bw|bigwig)$/i.test( urlTemplate ) ? 'JBrowse/Store/SeqFeature/BigWig'                                                   :
+                        /\.(fa|fasta)$/i.test( urlTemplate )  ? 'JBrowse/Store/Sequence/IndexedFasta'                                               :
+                        /\.2bit$/i.test( urlTemplate )        ? 'JBrowse/Store/Sequence/TwoBit'                                                     :
                         /\/Sequence$/.test(trackConfig.type)  ? 'JBrowse/Store/Sequence/StaticChunked'                                              :
                                                                  null
                 );
@@ -236,7 +238,8 @@ return declare('JBrowse.ConfigAdaptor.JB_json_v1',null,
 
                 // if this is the first sequence store we see, and we
                 // have no refseqs store defined explicitly, make this the refseqs store.
-                if( (storeClass == 'JBrowse/Store/Sequence/StaticChunked' || trackConfig.useAsRefSeqStore) && !mainconf.stores['refseqs'] )
+                console.log(storeClass)
+                if( (storeClass == 'JBrowse/Store/Sequence/StaticChunked' || storeClass == 'JBrowse/Store/Sequence/IndexedFasta' || storeClass == 'JBrowse/Store/Sequence/TwoBit' || trackConfig.useAsRefSeqStore) && !mainconf.stores['refseqs'] )
                     storeConf.name = 'refseqs';
                 else
                     storeConf.name = 'store'+digest.objectFingerprint( storeConf );
